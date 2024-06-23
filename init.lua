@@ -584,6 +584,7 @@ require('lazy').setup {
         jsonls = {},
         cssls = {},
         csharp_ls = {},
+        dockerls = {},
         gopls = {},
         htmx = {},
         templ = {},
