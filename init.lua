@@ -175,10 +175,13 @@ vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
+vim.keymap.set('n', 'gh', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Call lsp format function
+vim.keymap.set('n', '<leader>f', vim.lsp.buf.format, { desc = 'Format the current buffer' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -579,11 +582,12 @@ require('lazy').setup {
         },
         tsserver = {},
         emmet_ls = {
-          filetypes = { 'html', 'css', 'javascript', 'typescript', 'templ', 'jinja' },
+          filetypes = { 'html', 'css', 'templ', 'jinja' },
         },
         jsonls = {},
         cssls = {},
         csharp_ls = {},
+        powershell_es = {},
         bashls = {},
         dockerls = {},
         gopls = {},
@@ -591,16 +595,7 @@ require('lazy').setup {
         templ = {},
         terraformls = {},
         jinja_lsp = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
-        --
-
+        angularls = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes { ...},
@@ -787,7 +782,7 @@ require('lazy').setup {
     config = function()
       -- Set transparency
       require('tokyonight').setup {
-        transparent = true,
+        transparent = false,
         styles = {
           sidebars = 'transparent',
           floats = 'transparent',
@@ -901,6 +896,26 @@ require('lazy').setup {
   },
 
   {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "canary",
+    dependencies = {
+      { "github/copilot.vim" }, -- or github/copilot.vim
+      { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
+    },
+    -- opts = {
+    --   debug = false, -- Enable debugging
+    --   -- See Configuration section for rest
+    -- },
+    config = function()
+      require('CopilotChat').setup({})
+      local chat = require("CopilotChat")
+      vim.keymap.set("n", "<leader>cc", function() chat.toggle() end, { desc = 'toggle [C]opilot [C]hat window' })
+    end,
+
+    -- See Commands section for default commands if you want to lazy load on them
+  },
+
+  {
     'christoomey/vim-tmux-navigator',
     lazy = false,
     config = function()
@@ -947,19 +962,15 @@ require('lazy').setup {
         }):find()
       end
 
-      vim.keymap.set('n', '<leader>hh', function() toggle_telescope(harpoon:list()) end, { desc = 'Open Harpoon in telescope' })
-
-      vim.keymap.set("n", "<leader>ha", function() harpoon:list():append() end, { desc = 'Add current buffer to Harpoon' })
-      vim.keymap.set("n", "<leader>hm", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = 'Toggle Harpoon menu' })
-
+      vim.keymap.set("n", "<leader>ha", function() harpoon:list():add() end, { desc = 'Add current buffer to Harpoon' })
+      vim.keymap.set('n', '<leader>ht', function() toggle_telescope(harpoon:list()) end, { desc = 'Open Harpoon in telescope' })
+      vim.keymap.set("n", "<leader>hh", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = 'Toggle Harpoon menu' })
+      vim.keymap.set("n", "<leader>hp", function() harpoon:list():prev() end, { desc = 'Select previous Harpoon buffer' })
+      vim.keymap.set("n", "<leader>hn", function() harpoon:list():next() end, { desc = 'Select next Harpoon buffer' })
       vim.keymap.set("n", "<leader>j", function() harpoon:list():select(1) end, { desc = 'Select Harpoon buffer 1' })
       vim.keymap.set("n", "<leader>k", function() harpoon:list():select(2) end, { desc = 'Select Harpoon buffer 2' })
       vim.keymap.set("n", "<leader>l", function() harpoon:list():select(3) end, { desc = 'Select Harpoon buffer 3' })
       vim.keymap.set("n", "<leader>;", function() harpoon:list():select(4) end, { desc = 'Select Harpoon buffer 4' })
-
-      -- Toggle previous & next buffers stored within Harpoon list
-      vim.keymap.set("n", "<leader>hn", function() harpoon:list():prev() end, { desc = 'Select previous Harpoon buffer' })
-      vim.keymap.set("n", "<leader>hp", function() harpoon:list():next() end, { desc = 'Select next Harpoon buffer' })
 
     end,
   },
@@ -1034,7 +1045,7 @@ require('lazy').setup {
           vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DapBreakpointColor", linehl = "", numhl = "" })
 
           -- allow for .vscode/launch.json configurations
-          require('dap.ext.vscode').load_launchjs(nil, { coreclr = { 'cs' } })
+          -- require('dap.ext.vscode').load_launchjs(nil, { coreclr = { 'cs' } })
 
           -- specific language configurations
           -- go
